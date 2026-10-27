@@ -1346,11 +1346,11 @@ DANSUGC = OAuthProvider(
     setup_url="https://dansugc.com/dashboard/api-keys?utm_source=treg",
     setup_action_label="Get your DansUGC API key",
     setup_steps=(
-        "Sign in to DansUGC on a Scale plan and open Dashboard → API keys.",
+        "Sign in to DansUGC (any plan) and open Dashboard → Developers.",
         "Create a secret key (it starts with dsk_) and copy it; it is shown once.",
     ),
-    setup_note="The REST API needs a Scale subscription. Licensing a clip spends account credits; "
-               "search, filters, clip details and the key check are free.",
+    setup_note="Any DansUGC account's key covers these B-roll endpoints. Licensing a clip spends "
+               "account credits; search, filters, clip details and the key check are free.",
     auth_uri="", token_uri="",
     scopes={},
     client_id_setting="", client_secret_setting="",

@@ -4,7 +4,7 @@ source:
   openapi: https://dansugc.com/api/openapi.json
   curated: '2026-10-08'
 pricing_url: https://dansugc.com/pricing
-limits: "60 requests/minute per key (429 with Retry-After: 60). The REST API needs a Scale subscription; other plans get 403 subscription_required."
+limits: "60 requests/minute per key (429 with Retry-After: 60). The B-roll endpoints work on every DansUGC plan; licensing needs enough account credits."
 proposed_capabilities:
   ugc.clips.search: Search licensable UGC clips
   ugc.clips.filters: List the filter values for UGC clip search
