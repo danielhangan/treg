@@ -1,8 +1,3 @@
-# DansUGC B-roll: a library of real-human UGC reaction clips (filmed by real creators, never AI),
-# licensed per clip and paid in DansUGC credits. This listing is deliberately limited to the B-roll
-# surface — search, inspect, license and re-download clips. Custom creator orders, packages, posting,
-# customer sub-keys, uploads and the ScrapeCreators passthrough are out of scope (see the PR's
-# full-surface map).
 provider: dansugc
 source:
   docs: https://dansugc.com/docs
@@ -11,7 +6,7 @@ source:
 pricing_url: https://dansugc.com/pricing
 limits: "60 requests/minute per key (429 with Retry-After: 60). The REST API needs a Scale subscription; other plans get 403 subscription_required."
 proposed_capabilities:
-  ugc.clips.search: Search licensable real-human UGC reaction clips
+  ugc.clips.search: Search licensable UGC clips
   ugc.clips.filters: List the filter values for UGC clip search
   ugc.clip.detail: Get a UGC clip's details & price
   ugc.clips.purchase: License UGC clips and get their download links
@@ -19,25 +14,25 @@ proposed_capabilities:
 
 endpoints:
   - id: dansugc.ugc.clips.search
+    added: '2026-10-27'
     capability: ugc.clips.search
     platform: ugc
     domain: clips
     scope: any_account
     method: GET
     path: /broll
-    name: Search UGC reaction clips
+    name: Search UGC reaction clips by keyword or description
     summary: List B-Roll Videos
     input:
       queryParams:
-        search: {type: string, required: false, note: "keyword search over title, tags and description; do not combine with semantic_search", example: "surprised"}
-        semantic_search: {type: string, required: false, note: "natural-language search, e.g. 'woman laughing at her phone'; do not combine with search", example: "woman laughing at her phone"}
+        search: {type: string, required: false, note: "keyword search over title, tags and description. Use this or semantic_search, not both", example: "surprised"}
+        semantic_search: {type: string, required: false, note: "describe the shot in plain words; results are ranked by meaning, not keywords. Use this or search, not both", example: "woman laughing at her phone in bed"}
         emotion: {type: string, required: false, note: "a value from dansugc.ugc.clips.filters", example: "happy"}
         gender: {type: string, required: false, example: "female"}
         location: {type: string, required: false, example: "Bedroom"}
         age_range: {type: string, required: false, example: "18-24"}
         hair_color: {type: string, required: false, example: "Blonde"}
         outfit: {type: string, required: false, example: "Casual"}
-        model_id: {type: string, required: false, note: "creator UUID from dansugc.ugc.creators.search"}
         media_type: {type: string, required: false, enum: [video, image]}
         featured: {type: boolean, required: false}
         min_virality: {type: number, required: false}
@@ -50,29 +45,8 @@ endpoints:
     cost: {type: free, value: 0, currency: USD, unit: call, source: docs, source_url: https://dansugc.com/docs, checked: '2026-10-08', confidence: documented, note: "Searching and browsing never spend credits"}
     docs_url: https://dansugc.com/docs#tag/b-roll/GET/broll
 
-  - id: dansugc.ugc.clips.semantic_search
-    capability: ugc.clips.search
-    platform: ugc
-    domain: clips
-    scope: any_account
-    method: GET
-    path: /broll
-    name: Find UGC clips by describing the shot
-    summary: List B-Roll Videos
-    input:
-      queryParams:
-        semantic_search: {type: string, required: true, note: "describe the shot in plain words; results are ranked by meaning, not keywords", example: "woman laughing at her phone in bed"}
-        media_type: {type: string, required: false, enum: [video, image]}
-        gender: {type: string, required: false, example: "female"}
-        emotion: {type: string, required: false, example: "happy"}
-        limit: {type: integer, required: false, default: 24, max: 100}
-        page: {type: integer, required: false, default: 1}
-      note: "Same route as dansugc.ugc.clips.search in semantic mode. Each result carries `price` in credits for the caller. Free to call."
-    test_request: {queryParams: {semantic_search: "woman laughing at her phone in bed", limit: 1}}
-    cost: {type: free, value: 0, currency: USD, unit: call, source: docs, source_url: https://dansugc.com/docs, checked: '2026-10-08', confidence: documented, note: "Searching never spends credits"}
-    docs_url: https://dansugc.com/docs#tag/b-roll/GET/broll
-
   - id: dansugc.ugc.clips.filters
+    added: '2026-10-27'
     capability: ugc.clips.filters
     platform: ugc
     domain: clips
@@ -88,6 +62,7 @@ endpoints:
     docs_url: https://dansugc.com/docs#tag/b-roll/GET/broll/filters
 
   - id: dansugc.ugc.clip.detail
+    added: '2026-10-27'
     capability: ugc.clip.detail
     platform: ugc
     domain: clips
@@ -105,6 +80,7 @@ endpoints:
     docs_url: https://dansugc.com/docs#tag/b-roll/GET/broll/{videoId}
 
   - id: dansugc.ugc.clips.purchase
+    added: '2026-10-27'
     capability: ugc.clips.purchase
     platform: ugc
     domain: clips
@@ -120,7 +96,7 @@ endpoints:
         expected_total_cents: {type: integer, required: false, note: "the confirmed total in hundredths of a credit. A call without it (or with a stale value) charges nothing and answers 409 with requiresConfirmation and expectedTotalCents (e.g. 1100 for one video); repeat the call with that value to buy", example: 1100}
         customer_email: {type: string, required: false, note: "your end customer, for your own billing reconciliation"}
       bodyType: json
-      note: "Two-step confirm: call once without expected_total_cents to get the exact total (409, nothing charged), then again with it to buy. Clips the account already owns come back under already_purchased and are not charged again. download_url links are signed for 1 hour; dansugc.ugc.purchases.list re-issues them."
+      note: "Two-step confirm: call once without expected_total_cents to get the exact total (409, nothing charged), then again with it to buy. Clips the account already owns come back under already_purchased and are not charged again. download_url links are signed for 1 hour; dansugc.ugc.purchases.list re-issues them. Each clip comes with a 12-month commercial license."
     # Deliberate zero-charge target: a clip the test account already owns, confirmed at 0.
     test_request: {body: {video_ids: ["1166a85d-b967-4fb0-8ed8-6d2f2d22f23b"], expected_total_cents: 0}}
     cost:
@@ -133,10 +109,11 @@ endpoints:
       source_url: https://dansugc.com/api/pricing/settings
       checked: '2026-10-08'
       confidence: documented
-      note: "List price 11 credits per video clip and 8 per image (settings.broll.videoListCents / imageListCents in the public rate card). Plan discounts are set live in the same rate card (brollPlanDiscounts; 0% on 2026-10-08) and a live sale can lower the price. Already-owned clips and 409 confirmation answers are free. Observed 2026-10-08: a confirmed buy of one video clip returned price_paid 11 and total_amount 11. The test_request is a deliberate zero-charge call on a clip the test account already owns (the verification account DansUGC provides owns it)."
+      note: "11 credits per video, 8 per image (list price in the public rate card), less any live plan discount or sale. Already-owned clips and 409 confirmation answers are free."
     docs_url: https://dansugc.com/docs#tag/b-roll/POST/broll/purchase
 
   - id: dansugc.ugc.purchases.list
+    added: '2026-10-27'
     capability: ugc.purchases.list
     platform: ugc
     domain: clips
