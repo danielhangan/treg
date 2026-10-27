@@ -1343,7 +1343,7 @@ DANSUGC = OAuthProvider(
     # Bearer header only; DansUGC accepts no query-param key.
     token_header="Authorization",
     token_format="Bearer {secret}",
-    setup_url="https://dansugc.com/dashboard/api-keys",
+    setup_url="https://dansugc.com/dashboard/api-keys?utm_source=treg",
     setup_action_label="Get your DansUGC API key",
     setup_steps=(
         "Sign in to DansUGC on a Scale plan and open Dashboard → API keys.",
